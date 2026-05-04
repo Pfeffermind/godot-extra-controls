@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const elements_dir := "res://addons/tnowe_extra_controls/elements/"
+const elements_dir := "res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/"
 
 var element_scripts := [
 	["DataDropper", preload(elements_dir + "data_dropper.gd"), null],

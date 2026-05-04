@@ -1,15 +1,14 @@
-[gd_scene load_steps=16 format=3 uid="uid://d2bii41ego0fp"]
+[gd_scene format=3 uid="uid://d2bii41ego0fp"]
 
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/draggable.gd" id="1_eddsv"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/scroll_zoom_view.gd" id="1_pmqwv"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/view_switcher.gd" id="2_rorhm"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/properties_box.gd" id="3_nn7w5"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/scale_container.gd" id="4_c4kjh"]
-[ext_resource type="Texture2D" uid="uid://6lx2qwr7mkwg" path="res://icon.svg" id="4_yfgq0"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/max_size_container.gd" id="6_ri1pc"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/connection_line.gd" id="9_axav4"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/radial_container_theme.gd" id="9_mu2b1"]
-[ext_resource type="Script" path="res://addons/tnowe_extra_controls/elements/radial_container.gd" id="10_i8nra"]
+[ext_resource type="Script" uid="uid://bhgg1ackfv6to" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/draggable.gd" id="1_eddsv"]
+[ext_resource type="Script" uid="uid://dxlttlby6etm3" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/scroll_zoom_view.gd" id="1_pmqwv"]
+[ext_resource type="Script" uid="uid://bdax5v6k7dit6" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/view_switcher.gd" id="2_rorhm"]
+[ext_resource type="Script" uid="uid://htt4msi3jlyo" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/properties_box.gd" id="3_nn7w5"]
+[ext_resource type="Script" uid="uid://b106asf0jwoew" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/scale_container.gd" id="4_c4kjh"]
+[ext_resource type="Texture2D" uid="uid://6lx2qwr7mkwg" path="res://addons/godot-extra-controls/icon.svg" id="4_yfgq0"]
+[ext_resource type="Script" uid="uid://r6yjaqhn7qe" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/max_size_container.gd" id="6_ri1pc"]
+[ext_resource type="Script" uid="uid://6bmuyuajj3sk" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/connection_line.gd" id="9_axav4"]
+[ext_resource type="Script" uid="uid://jcy14cu5hu8a" path="res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/radial_container.gd" id="10_i8nra"]
 
 [sub_resource type="GDScript" id="GDScript_43ggq"]
 script/source = "extends Control
@@ -68,24 +67,10 @@ func _input(event : InputEvent):
 "
 
 [sub_resource type="Resource" id="Resource_fme07"]
-script = ExtResource("9_mu2b1")
-radius_factor_outer = 1.2
-radius_factor_inner = 0.25
-item_radius_factor = 0.5
-item_scale = Vector2(1.2, 1.2)
-color = Color(1, 1, 1, 1)
-texture = ExtResource("4_yfgq0")
 
 [sub_resource type="Resource" id="Resource_vglod"]
-script = ExtResource("9_mu2b1")
-radius_factor_outer = 1.0
-radius_factor_inner = 0.2
-item_radius_factor = 0.5
-item_scale = Vector2(1, 1)
-color = Color(0.807843, 0.635294, 1, 0.486275)
-texture = ExtResource("4_yfgq0")
 
-[node name="ScrollContainer" type="ScrollContainer"]
+[node name="ScrollContainer" type="ScrollContainer" unique_id=1806524693]
 clip_contents = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -95,14 +80,14 @@ grow_vertical = 2
 horizontal_scroll_mode = 0
 metadata/_edit_lock_ = true
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=280032637]
 custom_minimum_size = Vector2(0, 10000)
 layout_mode = 2
 size_flags_horizontal = 3
 script = SubResource("GDScript_43ggq")
 metadata/_edit_lock_ = true
 
-[node name="ViewSwitcher" type="Control" parent="Control"]
+[node name="ViewSwitcher" type="Control" parent="Control" unique_id=1491370614]
 visible = false
 anchors_preset = 0
 offset_left = 324.0
@@ -112,7 +97,7 @@ offset_bottom = 155.0
 script = ExtResource("2_rorhm")
 background = NodePath("ColorRect")
 
-[node name="ColorRect" type="ColorRect" parent="Control/ViewSwitcher"]
+[node name="ColorRect" type="ColorRect" parent="Control/ViewSwitcher" unique_id=634573970]
 layout_mode = 0
 offset_left = -149.0
 offset_top = -29.0
@@ -120,7 +105,7 @@ offset_right = 280.0
 offset_bottom = 247.0
 color = Color(0, 0, 0, 1)
 
-[node name="ColorRect2" type="ColorRect" parent="Control/ViewSwitcher"]
+[node name="ColorRect2" type="ColorRect" parent="Control/ViewSwitcher" unique_id=2057860145]
 layout_mode = 0
 offset_left = -57.0
 offset_top = 37.0
@@ -128,7 +113,7 @@ offset_right = -17.0
 offset_bottom = 77.0
 color = Color(0.682353, 0.615686, 0.615686, 1)
 
-[node name="ColorRect3" type="ColorRect" parent="Control/ViewSwitcher"]
+[node name="ColorRect3" type="ColorRect" parent="Control/ViewSwitcher" unique_id=671683220]
 visible = false
 layout_mode = 0
 offset_left = 5.0
@@ -137,7 +122,7 @@ offset_right = 45.0
 offset_bottom = 142.0
 color = Color(0.682353, 0.615686, 0.615686, 1)
 
-[node name="ColorRect4" type="ColorRect" parent="Control/ViewSwitcher"]
+[node name="ColorRect4" type="ColorRect" parent="Control/ViewSwitcher" unique_id=910529401]
 visible = false
 layout_mode = 0
 offset_left = 114.0
@@ -146,7 +131,7 @@ offset_right = 154.0
 offset_bottom = 85.0
 color = Color(0.682353, 0.615686, 0.615686, 1)
 
-[node name="PropertiesBox" type="VBoxContainer" parent="Control"]
+[node name="PropertiesBox" type="VBoxContainer" parent="Control" unique_id=943869262]
 layout_mode = 0
 offset_left = 22.0
 offset_top = 36.0
@@ -154,8 +139,8 @@ offset_right = 400.0
 offset_bottom = 256.0
 script = ExtResource("3_nn7w5")
 
-[node name="ScrollZoomViewDemo" type="ColorRect" parent="Control"]
-layout_mode = 2
+[node name="ScrollZoomViewDemo" type="ColorRect" parent="Control" unique_id=1787980736]
+layout_mode = 0
 offset_left = 416.0
 offset_top = 27.0
 offset_right = 1122.0
@@ -164,7 +149,7 @@ color = Color(0.258824, 0.321569, 0.756863, 1)
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
-[node name="ScrollZoomView" type="MarginContainer" parent="Control/ScrollZoomViewDemo"]
+[node name="ScrollZoomView" type="MarginContainer" parent="Control/ScrollZoomViewDemo" unique_id=1416478073]
 clip_contents = true
 custom_minimum_size = Vector2(706, 524)
 layout_mode = 1
@@ -179,15 +164,15 @@ script = ExtResource("1_pmqwv")
 pan_button = 6
 child_size = Vector2(706, 524)
 
-[node name="Control" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView"]
+[node name="Control" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView" unique_id=1900363699]
 custom_minimum_size = Vector2(706, 524)
 layout_mode = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.0509804)
 
-[node name="Draggable3" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control"]
+[node name="Draggable3" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control" unique_id=1456315221]
 custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
+layout_mode = 0
 offset_left = 64.0
 offset_top = 32.0
 offset_right = 160.0
@@ -200,26 +185,26 @@ drop_color = Color(1, 1, 1, 0.501961)
 resize_margin_offset_children = false
 metadata/_edit_group_ = true
 
-[node name="ColorRect2" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3"]
+[node name="ColorRect2" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3" unique_id=1058276000]
 layout_mode = 2
 mouse_filter = 2
 color = Color(1, 0.647, 0.969, 0.5)
 
-[node name="ScaleContainer" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3"]
+[node name="ScaleContainer" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3" unique_id=1616799662]
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("4_c4kjh")
 stretch_mode = 1
 metadata/_edit_group_ = true
 
-[node name="ColorRect" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3/ScaleContainer"]
+[node name="ColorRect" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3/ScaleContainer" unique_id=223812018]
 self_modulate = Color(1, 1, 1, 0.498039)
 show_behind_parent = true
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3/ScaleContainer/ColorRect"]
+[node name="TextureRect" type="TextureRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3/ScaleContainer/ColorRect" unique_id=2125900893]
 self_modulate = Color(1, 1, 1, 0.498039)
 layout_mode = 1
 anchors_preset = 8
@@ -237,7 +222,7 @@ mouse_filter = 2
 texture = ExtResource("4_yfgq0")
 expand_mode = 1
 
-[node name="Label" type="Label" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3/ScaleContainer/ColorRect"]
+[node name="Label" type="Label" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable3/ScaleContainer/ColorRect" unique_id=609556235]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -256,9 +241,9 @@ don't resize"
 label_settings = SubResource("LabelSettings_kvdg6")
 horizontal_alignment = 1
 
-[node name="Draggable" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control"]
+[node name="Draggable" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control" unique_id=1808712360]
 custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
+layout_mode = 0
 offset_left = 96.0
 offset_right = 256.0
 offset_bottom = 192.0
@@ -271,19 +256,19 @@ drop_color = Color(1, 1, 1, 0.501961)
 resize_margin_offset_children = false
 metadata/_edit_group_ = true
 
-[node name="MaxSizeContainer" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable"]
+[node name="MaxSizeContainer" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable" unique_id=967464698]
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("6_ri1pc")
 max_size = Vector2(160, -1)
 
-[node name="ColorRect" type="Panel" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable/MaxSizeContainer"]
+[node name="ColorRect" type="Panel" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable/MaxSizeContainer" unique_id=1930957545]
 custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 size_flags_vertical = 6
 mouse_filter = 2
 
-[node name="Label" type="Label" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable/MaxSizeContainer/ColorRect"]
+[node name="Label" type="Label" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable/MaxSizeContainer/ColorRect" unique_id=303888077]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -299,14 +284,14 @@ grow_vertical = 2
 text = "Max Size"
 horizontal_alignment = 1
 
-[node name="ColorRect" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable"]
+[node name="ColorRect" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable" unique_id=833427290]
 layout_mode = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.5)
 
-[node name="Draggable2" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control"]
+[node name="Draggable2" type="Container" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control" unique_id=1548683410]
 custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
+layout_mode = 0
 offset_top = 32.0
 offset_right = 224.0
 offset_bottom = 256.0
@@ -319,17 +304,16 @@ drop_color = Color(1, 1, 1, 0.501961)
 resize_margin_offset_children = false
 metadata/_edit_group_ = true
 
-[node name="ColorRect" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable2"]
+[node name="ColorRect" type="ColorRect" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Draggable2" unique_id=428812828]
 layout_mode = 2
 mouse_filter = 2
 color = Color(1, 0.792, 0.255, 0.5)
 
-[node name="Connections" type="Control" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control"]
+[node name="Connections" type="Control" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control" unique_id=998360564]
 anchors_preset = 0
 metadata/_edit_lock_ = true
 
-[node name="Line" type="Control" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Connections" node_paths=PackedStringArray("connect_node1", "connect_node2")]
-layout_mode = 3
+[node name="Line" type="Control" parent="Control/ScrollZoomViewDemo/ScrollZoomView/Control/Connections" unique_id=849693174 node_paths=PackedStringArray("connect_node1", "connect_node2")]
 anchors_preset = 0
 offset_left = 104.0
 offset_top = 22.0
@@ -348,7 +332,7 @@ line_blocks_input = true
 drag_reattach_call_on_success = "print(\"Connected to: \", name)"
 end_style1 = 2
 
-[node name="RadialMenu" type="Control" parent="Control"]
+[node name="RadialMenu" type="Control" parent="Control" unique_id=665954800]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 147.0
@@ -359,7 +343,7 @@ script = SubResource("GDScript_thcdi")
 radial_theme_active = SubResource("Resource_fme07")
 radial_theme_inactive = SubResource("Resource_vglod")
 
-[node name="RadialContainer" type="Container" parent="Control/RadialMenu"]
+[node name="RadialContainer" type="Container" parent="Control/RadialMenu" unique_id=1341032872]
 layout_mode = 0
 offset_left = 46.0
 offset_top = 22.0
@@ -368,24 +352,24 @@ offset_bottom = 242.0
 script = ExtResource("10_i8nra")
 progress_offset = 0.68
 
-[node name="Label" type="Label" parent="Control/RadialMenu/RadialContainer"]
+[node name="Label" type="Label" parent="Control/RadialMenu/RadialContainer" unique_id=603356639]
 layout_mode = 2
 text = "0"
 
-[node name="Label2" type="Label" parent="Control/RadialMenu/RadialContainer"]
+[node name="Label2" type="Label" parent="Control/RadialMenu/RadialContainer" unique_id=212306015]
 layout_mode = 2
 text = "1"
 
-[node name="Label3" type="Button" parent="Control/RadialMenu/RadialContainer"]
+[node name="Label3" type="Button" parent="Control/RadialMenu/RadialContainer" unique_id=947958291]
 layout_mode = 2
 size_flags_stretch_ratio = 3.0
 text = "2"
 
-[node name="Label4" type="Label" parent="Control/RadialMenu/RadialContainer"]
+[node name="Label4" type="Label" parent="Control/RadialMenu/RadialContainer" unique_id=911961571]
 layout_mode = 2
 text = "3"
 
-[node name="Label5" type="Label" parent="Control/RadialMenu/RadialContainer"]
+[node name="Label5" type="Label" parent="Control/RadialMenu/RadialContainer" unique_id=752316952]
 layout_mode = 2
 size_flags_stretch_ratio = 1.5
 text = "4"
