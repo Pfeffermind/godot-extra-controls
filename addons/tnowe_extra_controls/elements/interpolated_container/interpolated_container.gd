@@ -50,6 +50,15 @@ enum ItemAlignment {
 		if is_inside_tree():
 			if v: _all_boxes.append(self)
 			else: _all_boxes.erase(self)
+
+## If true, a full container may replace its current child when a new child is dropped into it.
+## Currently intended for drag_max_count == 1.
+@export var allow_drag_replace_when_full := false
+@export var drag_replace_only_on_release := true
+
+## Z index to apply to dragged nodes while dragging.
+@export var drag_z_index := 100
+
 ## If the child count matches this, new children cannot be added through [member allow_drag_insert]. Does not prevent other means of adding children.[br]
 ## Set to [code]-1[/code] to remove the limit. [br]
 ## This is equivalent to [member drag_insert_condition] set to [code]into.get_child_count() < (count)[/code].
@@ -80,6 +89,10 @@ static var _all_boxes : Array[InterpolatedContainer] = []
 
 var _drag_insert_condition_exp : Expression
 var _dragging_node : Control
+var _dragging_original_z_indices : Dictionary = {}
+var _restore_z_index_after_animation := false
+var _z_restore_node : Control
+
 var _children_xforms_start : Array[Transform2D] = []
 var _children_xforms_end : Array[Transform2D] = []
 var _children_sizes_start : Array[Vector2] = []
@@ -87,6 +100,7 @@ var _children_sizes_end : Array[Vector2] = []
 var _interp_progress_factor := 0.0
 var _skip_next_reorder := false
 var _affected_by_multi_selection : MultiSelection
+var _pending_drop_container : InterpolatedContainer
 
 
 func _get_minimum_size() -> Vector2:
@@ -127,14 +141,18 @@ func sort_children_by_expression(expr : Callable):
 
 ## Forcibly releases children that are being dragged.
 func force_release():
-	drag_ended.emit(_dragging_node)
-	_dragging_node = null
+	if _dragging_node != null:
+		_mark_restore_dragged_node_z_index(_dragging_node)
+		drag_ended.emit(_dragging_node)
+		_dragging_node = null
 	queue_sort()
 	set_process_input(false)
 
 
 func _process(delta : float):
 	if move_time == 0.0:
+		if _restore_z_index_after_animation:
+			_restore_marked_node_z_index()
 		set_process(false)
 		return
 
@@ -158,6 +176,8 @@ func _process(delta : float):
 		_dragging_node.global_position = dragged_node_pos
 
 	if _interp_progress_factor >= 1.0:
+		if _restore_z_index_after_animation:
+			_restore_marked_node_z_index()
 		set_process(false)
 
 	if _affected_by_multi_selection != null:
@@ -198,11 +218,25 @@ func _input(event : InputEvent):
 			_affected_by_multi_selection.queue_redraw()
 
 	if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && !event.pressed:
-		drag_ended.emit(_dragging_node)
-		_dragging_node = null
-		queue_sort()
-		set_process_input(false)
+		if _pending_drop_container != null && is_instance_valid(_pending_drop_container):
+			var target := _pending_drop_container
+			_pending_drop_container = null
+			_transfer_child_to_container(_dragging_node, target, false)
+			target._finish_drag_release()
+			return
 
+		_finish_drag_release()
+
+func _finish_drag_release():
+	if _dragging_node == null:
+		return
+
+	_mark_restore_dragged_node_z_index(_dragging_node)
+	drag_ended.emit(_dragging_node)
+	_dragging_node = null
+	_pending_drop_container = null
+	queue_sort()
+	set_process_input(false)
 
 func _ready():
 	set_process_input(false)
@@ -240,29 +274,17 @@ func _notification(what : int):
 
 
 func _insert_child_in_other(child : Control, mouse_global_position : Vector2):
-	for x in _all_boxes:
-		if !x.allow_drag_insert || !Rect2(Vector2.ZERO, x.size).has_point(x.get_global_transform().affine_inverse() * mouse_global_position):
-			continue
+	var target := _find_drop_target(mouse_global_position, child)
+	_pending_drop_container = target
 
-		if x.drag_max_count > -1 && x.get_child_count(true) >= x.drag_max_count:
-			continue
+	if target == null:
+		return
 
-		if x._drag_insert_condition_exp != null && x._drag_insert_condition_exp.execute([self, x], child) != true:
-			continue
+	if target.drag_replace_only_on_release:
+		return
 
-		child.reparent(x)
-		x._dragging_node = child
-		x.set_process_input(true)
-		set_process_input(false)
-		if !drag_insert_call_on_success.is_empty():
-			# Can be compiled on the spot - not called as often.
-			var success_expr := Expression.new()
-			success_expr.parse(drag_insert_call_on_success)
-			success_expr.execute([self, x], child)
-
-		drag_transfered_out.emit(child, x)
-		x.drag_transfered_in.emit(child, self)
-		break
+	_transfer_child_to_container(child, target)
+	_pending_drop_container = null
 
 
 func _on_child_entered_tree(x : Node):
@@ -279,7 +301,140 @@ func _on_child_gui_input(event : InputEvent, child : Control):
 	if !allow_drag_reorder && !allow_drag_transfer:
 		return
 
+	if !_can_drag_child(child):
+		return
+
 	if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
+		if _restore_z_index_after_animation:
+			_restore_marked_node_z_index()
+
 		_dragging_node = child
+		_dragging_original_z_indices[child.get_instance_id()] = child.z_index
+		_restore_z_index_after_animation = false
+		_z_restore_node = null
+		_apply_dragged_node_z_index()
 		drag_started.emit(child)
 		set_process_input(true)
+
+func _can_drag_child(child : Control) -> bool:
+	if child == null:
+		return false
+
+	if child.has_method(&"is_disabled"):
+		if child.is_disabled():
+			return false
+
+	for property in child.get_property_list():
+		if property.name == &"disabled":
+			if child.get(&"disabled") == true:
+				return false
+			break
+
+	return true
+
+func _apply_dragged_node_z_index():
+	if _dragging_node == null:
+		return
+
+	_dragging_node.z_index = drag_z_index
+
+
+func _mark_restore_dragged_node_z_index(node : Control):
+	if node == null:
+		return
+
+	_restore_z_index_after_animation = true
+	_z_restore_node = node
+
+
+func _restore_marked_node_z_index():
+	if _z_restore_node != null && is_instance_valid(_z_restore_node):
+		var id := _z_restore_node.get_instance_id()
+		if _dragging_original_z_indices.has(id):
+			_z_restore_node.z_index = _dragging_original_z_indices[id]
+			_dragging_original_z_indices.erase(id)
+
+	_restore_z_index_after_animation = false
+	_z_restore_node = null
+
+func _find_drop_target(mouse_global_position : Vector2, child : Control) -> InterpolatedContainer:
+	for x in _all_boxes:
+		if !x.allow_drag_insert:
+			continue
+
+		if x == self:
+			continue
+
+		if !Rect2(Vector2.ZERO, x.size).has_point(x.get_global_transform().affine_inverse() * mouse_global_position):
+			continue
+
+		var dest_count := x.get_child_count(true)
+		var destination_is_full := x.drag_max_count > -1 && dest_count >= x.drag_max_count
+
+		if destination_is_full && !x.allow_drag_replace_when_full:
+			continue
+
+		if !destination_is_full && x.drag_max_count > -1 && dest_count >= x.drag_max_count:
+			continue
+
+		if x._drag_insert_condition_exp != null && x._drag_insert_condition_exp.execute([self, x], child) != true:
+			continue
+
+		return x
+
+	return null
+
+func _transfer_child_to_container(child : Control, x : InterpolatedContainer, keep_dragging := true):
+	if x == null || child == null:
+		return
+
+	var dest_count := x.get_child_count(true)
+	var destination_is_full := x.drag_max_count > -1 && dest_count >= x.drag_max_count
+	var source_index := child.get_index()
+	var replaced_child : Control = null
+
+	if destination_is_full:
+		for c in x.get_children(true):
+			if c is Control && c != child:
+				replaced_child = c
+				break
+
+		if replaced_child == null:
+			return
+
+		replaced_child.reparent(self)
+		var target_index := clampi(source_index, 0, get_child_count(true))
+		move_child(replaced_child, target_index)
+		queue_sort()
+
+	child.reparent(x)
+
+	if _dragging_node == child:
+		_dragging_node = null
+
+	var child_id := child.get_instance_id()
+	var child_original_z := child.z_index
+	if _dragging_original_z_indices.has(child_id):
+		child_original_z = _dragging_original_z_indices[child_id]
+		_dragging_original_z_indices.erase(child_id)
+
+	x._dragging_original_z_indices[child_id] = child_original_z
+	x._restore_z_index_after_animation = _restore_z_index_after_animation
+	x._z_restore_node = _z_restore_node
+
+	x._dragging_node = child
+	x._apply_dragged_node_z_index()
+	x.set_process_input(keep_dragging)
+	set_process_input(false)
+
+	if !drag_insert_call_on_success.is_empty():
+		# Can be compiled on the spot - not called as often.
+		var success_expr := Expression.new()
+		success_expr.parse(drag_insert_call_on_success)
+		success_expr.execute([self, x], child)
+
+	drag_transfered_out.emit(child, x)
+	x.drag_transfered_in.emit(child, self)
+
+	if replaced_child != null:
+		x.queue_sort()
