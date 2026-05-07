@@ -7,7 +7,7 @@ extends MenuButton
 ## Signals of all submenus are broadcast through the popup. Get it using [method MenuButton.get_popup]._add_constant_central_force[br]
 ## You can use the class in [code]elements/text_init_menu/menu_filler.gd[/code] to initialize your menus with more control.
 
-const MenuFiller := preload("res://addons/tnowe_extra_controls/elements/text_init_menu/menu_filler.gd")
+const MenuFiller := preload("res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/text_init_menu/menu_filler.gd")
 
 ## The menu's items, as text.[br]
 ## Try:[br]

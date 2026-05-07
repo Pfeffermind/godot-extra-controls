@@ -8,7 +8,7 @@ signal number_changed(key : StringName, new_value : float)
 signal string_changed(key : StringName, new_value : String)
 signal bool_changed(key : StringName, new_value : bool)
 
-const UnfoldedOptionButton := preload("res://addons/tnowe_extra_controls/elements/unfolded_option_button.gd")
+const UnfoldedOptionButton := preload("res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/unfolded_option_button.gd")
 
 @export var _group_indent := 8.0
 

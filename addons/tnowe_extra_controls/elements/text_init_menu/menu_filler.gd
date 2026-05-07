@@ -1,6 +1,6 @@
 extends RefCounted
 
-const MenuItem := preload("res://addons/tnowe_extra_controls/elements/text_init_menu/menu_filler_item.gd")
+const MenuItem := preload("res://addons/godot-extra-controls/addons/tnowe_extra_controls/elements/text_init_menu/menu_filler_item.gd")
 
 var _lines := []
 var _item_icons := []
