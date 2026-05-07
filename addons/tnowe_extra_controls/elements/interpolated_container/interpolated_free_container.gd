@@ -15,6 +15,34 @@ extends InterpolatedContainer
 ## Overrides preview color of child [Draggable] nodes.
 @export var drop_color_override_children := false
 
+@export_group("Seeded Placement")
+## Show children in deterministic pseudo-random positions in the editor.
+@export var randomize_children_in_editor := true:
+	set(value):
+		randomize_children_in_editor = value
+		if is_inside_tree():
+			queue_sort()
+
+## Seed used for deterministic pseudo-random placement.
+@export var random_seed := 1:
+	set(value):
+		random_seed = value
+		if is_inside_tree():
+			queue_sort()
+
+var _did_initial_runtime_layout := false
+
+
+func _ready():
+	super()
+
+	if !Engine.is_editor_hint():
+		_queue_initial_runtime_sort.call_deferred()
+
+
+func _queue_initial_runtime_sort():
+	queue_sort()
+
 
 func _draw():
 	if _dragging_node == null || _dragging_node.get_parent() != self:
@@ -35,22 +63,91 @@ func _draw():
 
 
 func _sort_children():
-	for child in get_children(true):
-		if child is Control && child != _dragging_node:
+	var children := get_children(true)
+
+	if Engine.is_editor_hint():
+		if randomize_children_in_editor:
+			_sort_children_pseudo_randomly(children)
+		else:
+			_sort_children_freely(children)
+
+		_cache_size_and_queue_redraw()
+		return
+
+	if size.x <= 0.0 or size.y <= 0.0:
+		_cache_size_and_queue_redraw()
+		return
+
+	if !_did_initial_runtime_layout:
+		_did_initial_runtime_layout = true
+
+		_sort_children_pseudo_randomly(children)
+		_cache_size_and_queue_redraw()
+		return
+
+	_sort_children_freely(children)
+	_cache_size_and_queue_redraw()
+
+
+func _cache_size_and_queue_redraw():
+	cached_minimum_size = size
+	queue_redraw()
+
+
+func _sort_children_freely(children: Array[Node]):
+	for child in children:
+		if child is Control and child != _dragging_node:
 			fit_interpolated(child, get_rect_after_drop(child))
 
-	queue_redraw()
+
+func _sort_children_pseudo_randomly(children : Array):
+	var rng := RandomNumberGenerator.new()
+	rng.seed = random_seed
+
+	for child in children:
+		if !(child is Control) or child == _dragging_node:
+			continue
+
+		var control := child as Control
+		var rect := _get_seeded_rect_for_child(control, rng)
+		fit_interpolated(control, rect)
+
+
+func _get_seeded_rect_for_child(control : Control, rng : RandomNumberGenerator) -> Rect2:
+	var child_size := control.size
+
+	if child_size.x <= 0.0 or child_size.y <= 0.0:
+		child_size = control.get_combined_minimum_size()
+
+	var max_x := maxf(0.0, size.x - child_size.x)
+	var max_y := maxf(0.0, size.y - child_size.y)
+
+	var pos := Vector2(
+		rng.randf_range(0.0, max_x),
+		rng.randf_range(0.0, max_y)
+	)
+
+	if grid_snap != Vector2.ZERO:
+		pos = pos.snapped(grid_snap)
+
+	return Rect2(pos, child_size)
 
 
 func get_rect_after_drop(of_node : Control) -> Rect2:
 	if of_node is Draggable:
 		return of_node.get_rect_after_drop()
 
-	var grid_snap_offset_cur := grid_snap * 0.5 - Vector2.ONE
 	var result_position := of_node.position
 	var result_size := of_node.size
+
+	if result_size.x <= 0.0 or result_size.y <= 0.0:
+		result_size = of_node.get_combined_minimum_size()
+
 	if grid_snap != Vector2.ZERO:
 		result_position = result_position.snapped(grid_snap)
+
+	if size.x <= 0.0 or size.y <= 0.0:
+		return Rect2(result_position, result_size)
 
 	var xform_basis := of_node.get_transform().translated(-of_node.position)
 	var xformed_rect := (xform_basis * Rect2(Vector2.ZERO, result_size))
