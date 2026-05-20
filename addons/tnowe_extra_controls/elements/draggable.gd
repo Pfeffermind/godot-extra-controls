@@ -103,16 +103,18 @@ func _draw():
 
 func get_rect_after_drop() -> Rect2:
 	var used_grid_snap := grid_snap if _affected_by_free_container == null else _affected_by_free_container.grid_snap
+	var used_position_grid_snap := used_grid_snap if _affected_by_free_container == null else _affected_by_free_container.get_grid_snap_with_separation()
 	var grid_snap_offset_cur := used_grid_snap * 0.5 - Vector2.ONE
 	var result_position := position
 	var result_size := size
-	if used_grid_snap != Vector2.ZERO:
+	if used_position_grid_snap != Vector2.ZERO:
 		if _mouse_dragging_direction != Vector2i.ZERO:
-			result_position = (result_position - used_grid_snap * 0.5).snapped(used_grid_snap)
+			result_position = (result_position - used_position_grid_snap * 0.5).snapped(used_position_grid_snap)
 
 		else:
-			result_position = result_position.snapped(used_grid_snap)
+			result_position = result_position.snapped(used_position_grid_snap)
 
+	if used_grid_snap != Vector2.ZERO:
 		if grid_snap_affects_resize:
 			result_size = (size + grid_snap_offset_cur).snapped(used_grid_snap)
 

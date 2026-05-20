@@ -665,7 +665,7 @@ func _gui_input(event : InputEvent):
 						# Snap to grid and constrain to endpoint parents. Only if the point wasn't deleted when placed.
 						var result_point := mouse_point
 						if _connect_node1_parent != null && _connect_node1_parent is InterpolatedFreeContainer:
-							result_point = result_point.snapped(_connect_node1_parent.grid_snap)
+							result_point = result_point.snapped(_connect_node1_parent.get_grid_snap_with_separation())
 							result_point = result_point.clamp(Vector2.ZERO, _connect_node1_parent.size)
 
 						elif connect_node1 != null && connect_node1 is Draggable:
@@ -674,7 +674,7 @@ func _gui_input(event : InputEvent):
 								result_point = result_point.clamp(Vector2.ZERO, _connect_node1_parent.size)
 
 						if _connect_node2_parent != null && _connect_node2_parent is InterpolatedFreeContainer:
-							result_point = result_point.snapped(_connect_node2_parent.grid_snap)
+							result_point = result_point.snapped(_connect_node2_parent.get_grid_snap_with_separation())
 							result_point = result_point.clamp(Vector2.ZERO, _connect_node2_parent.size)
 
 						elif connect_node2 != null && connect_node2 is Draggable:

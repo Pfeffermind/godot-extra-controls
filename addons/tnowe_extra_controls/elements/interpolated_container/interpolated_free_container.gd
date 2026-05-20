@@ -15,7 +15,26 @@ enum PlacementMode {
 }
 
 ## Size of the grid to align children with when moved or resized.
-@export var grid_snap := Vector2.ZERO
+@export var grid_snap := Vector2.ZERO:
+	set(value):
+		grid_snap = value
+		if is_inside_tree():
+			queue_sort()
+			queue_redraw()
+## Horizontal spacing between grid cells when [member grid_snap] is used.
+@export var h_separation := 0.0:
+	set(value):
+		h_separation = value
+		if is_inside_tree():
+			queue_sort()
+			queue_redraw()
+## Vertical spacing between grid cells when [member grid_snap] is used.
+@export var v_separation := 0.0:
+	set(value):
+		v_separation = value
+		if is_inside_tree():
+			queue_sort()
+			queue_redraw()
 ## Color of the rectangle indicating a child's drop position.
 @export var drop_color := Color(0.5, 0.5, 0.5, 0.75)
 ## Overrides preview color of child [Draggable] nodes.
@@ -39,7 +58,8 @@ enum PlacementMode {
 			queue_sort()
 
 ## Grid positions used when [member placement_mode] is [constant PlacementMode.GRID_POSITIONS], matched to Control children by index.
-## Each position is multiplied by [member grid_snap]. If [member grid_snap] is zero, values are treated as pixel positions.
+## Each position is multiplied by [member grid_snap] plus [member h_separation] and [member v_separation].
+## If [member grid_snap] is zero, values are treated as pixel positions.
 @export var child_grid_positions : Array[Vector2i] = []:
 	set(value):
 		child_grid_positions = value
@@ -141,6 +161,13 @@ func _get_control_child_count() -> int:
 	return result
 
 
+func get_grid_snap_with_separation() -> Vector2:
+	if grid_snap == Vector2.ZERO:
+		return Vector2.ZERO
+
+	return grid_snap + Vector2(h_separation, v_separation)
+
+
 func _sort_children_by_placement_mode(children : Array[Node], constrain_children := true):
 	match placement_mode:
 		PlacementMode.SEEDED_RANDOM:
@@ -195,8 +222,9 @@ func _sort_children_by_grid_positions(children : Array[Node], constrain_children
 			child_size = control.get_combined_minimum_size()
 
 		var pos := Vector2(child_grid_positions[control_index])
-		if grid_snap != Vector2.ZERO:
-			pos *= grid_snap
+		var grid_step := get_grid_snap_with_separation()
+		if grid_step != Vector2.ZERO:
+			pos *= grid_step
 
 		var rect := Rect2(pos, child_size)
 		fit_interpolated(control, _constrain_rect_to_bounds(control, rect) if constrain_children else rect)
@@ -217,8 +245,9 @@ func _get_seeded_rect_for_child(control : Control, rng : RandomNumberGenerator) 
 		rng.randf_range(0.0, max_y)
 	)
 
-	if grid_snap != Vector2.ZERO:
-		pos = pos.snapped(grid_snap)
+	var grid_step := get_grid_snap_with_separation()
+	if grid_step != Vector2.ZERO:
+		pos = pos.snapped(grid_step)
 
 	return Rect2(pos, child_size)
 
@@ -259,8 +288,9 @@ func get_rect_after_drop(of_node : Control) -> Rect2:
 	if result_size.x <= 0.0 or result_size.y <= 0.0:
 		result_size = of_node.get_combined_minimum_size()
 
-	if grid_snap != Vector2.ZERO:
-		result_position = result_position.snapped(grid_snap)
+	var grid_step := get_grid_snap_with_separation()
+	if grid_step != Vector2.ZERO:
+		result_position = result_position.snapped(grid_step)
 
 	if size.x <= 0.0 or size.y <= 0.0:
 		return Rect2(result_position, result_size)
