@@ -221,9 +221,10 @@ func _input(event : InputEvent):
 		if _pending_drop_container != null && is_instance_valid(_pending_drop_container):
 			var target := _pending_drop_container
 			_pending_drop_container = null
-			_transfer_child_to_container(_dragging_node, target, false)
-			target._finish_drag_release()
-			return
+			if _can_drop_into_container(target, _dragging_node):
+				_transfer_child_to_container(_dragging_node, target, false)
+				target._finish_drag_release()
+				return
 
 		_finish_drag_release()
 
@@ -359,30 +360,36 @@ func _restore_marked_node_z_index():
 
 func _find_drop_target(mouse_global_position : Vector2, child : Control) -> InterpolatedContainer:
 	for x in _all_boxes:
-		if !x.allow_drag_insert:
-			continue
-
-		if x == self:
-			continue
-
 		if !Rect2(Vector2.ZERO, x.size).has_point(x.get_global_transform().affine_inverse() * mouse_global_position):
 			continue
 
-		var dest_count := x.get_child_count(true)
-		var destination_is_full := x.drag_max_count > -1 && dest_count >= x.drag_max_count
-
-		if destination_is_full && !x.allow_drag_replace_when_full:
-			continue
-
-		if !destination_is_full && x.drag_max_count > -1 && dest_count >= x.drag_max_count:
-			continue
-
-		if x._drag_insert_condition_exp != null && x._drag_insert_condition_exp.execute([self, x], child) != true:
+		if !_can_drop_into_container(x, child):
 			continue
 
 		return x
 
 	return null
+
+func _can_drop_into_container(x : InterpolatedContainer, child : Control) -> bool:
+	if x == null || child == null:
+		return false
+
+	if !is_instance_valid(x) || !x.allow_drag_insert || x == self:
+		return false
+
+	if !x.is_visible_in_tree():
+		return false
+
+	var dest_count := x.get_child_count(true)
+	var destination_is_full := x.drag_max_count > -1 && dest_count >= x.drag_max_count
+
+	if destination_is_full && !x.allow_drag_replace_when_full:
+		return false
+
+	if x._drag_insert_condition_exp != null && x._drag_insert_condition_exp.execute([self, x], child) != true:
+		return false
+
+	return true
 
 func _transfer_child_to_container(child : Control, x : InterpolatedContainer, keep_dragging := true):
 	if x == null || child == null:
